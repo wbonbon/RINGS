@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using aframe;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Expression.Shapes;
 using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -152,8 +153,12 @@ namespace RINGS.Models
 
         private async void StartTestBot()
         {
+            var config = new DiscordSocketConfig
+            {
+                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildVoiceStates
+            };
             this.isReady = false;
-            this.testBot = new DiscordSocketClient();
+            this.testBot = new DiscordSocketClient(config);
 
             this.testBot.Log += this.TestBot_Log;
             this.testBot.Ready += this.TestBot_Ready;
@@ -184,9 +189,12 @@ namespace RINGS.Models
             }
             else
             {
-                WPFHelper.Dispatcher.Invoke(() =>
-                    MessageBoxHelper.EnqueueSnackMessage("FATAL ERROR! Please, you check Help and Log."));
-                AppLogger.Error($"DISCORD Bot Tester - [{this.name}] {arg.Source}:{arg.Message}", arg.Exception);
+                if (arg.Exception.Message != "タスクが取り消されました。") // Discord.Netのバグ回避
+                {
+                    WPFHelper.Dispatcher.Invoke(() =>
+                        MessageBoxHelper.EnqueueSnackMessage("FATAL ERROR! Please, you check Help and Log."));
+                    AppLogger.Error($"DISCORD Bot Tester - [{this.name}] {arg.Source}:{arg.Message}", arg.Exception);
+                }
             }
 
             return Task.CompletedTask;

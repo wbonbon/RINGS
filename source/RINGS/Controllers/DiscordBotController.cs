@@ -95,7 +95,11 @@ namespace RINGS.Controllers
 
                         foreach (var config in newBots)
                         {
-                            var bot = new DiscordSocketClient();
+                            var discordconfig = new DiscordSocketConfig
+                            {
+                                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildVoiceStates
+                            };
+                            var bot = new DiscordSocketClient(discordconfig);
                             this.Bots.AddOrUpdate(
                                 config.Name,
                                 (_) => bot,
