@@ -219,7 +219,8 @@ namespace RINGS.Controllers
             }
             else
             {
-                AppLogger.Error($"DISCORD Bot - {arg.Source}:{arg.Message}", arg.Exception);
+                if (arg.Exception.Message != "タスクが取り消されました。") // Discord.Netのバグ回避
+                    AppLogger.Error($"DISCORD Bot - {arg.Source}:{arg.Message}", arg.Exception);
             }
 
             return Task.CompletedTask;

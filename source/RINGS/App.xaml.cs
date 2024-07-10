@@ -12,6 +12,7 @@ using aframe.Updater;
 using aframe.ViewModels;
 using RINGS.Controllers;
 using RINGS.Overlays;
+using RINGS.Common;
 
 namespace RINGS
 {
@@ -79,6 +80,8 @@ namespace RINGS
                 ChatOverlaysController.Instance.StartAsync(),
                 SharlayanController.Instance.StartAsync(),
                 DiscordBotController.Instance.StartAsync(),
+                Completion.Instance.StartAsync(),
+                
                 Task.Run(() =>
                 {
                     this.SetCredits();

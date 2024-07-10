@@ -55,7 +55,7 @@ namespace RINGS.ViewModels
                 InactiveStatus;
 
             this.CurrentPlayerName = shar.CurrentPlayer != null ?
-                $"{shar.CurrentPlayer.Name} ({shar.CurrentPlayer.Job})" :
+                $"{shar.CurrentPlayer.Name} ({shar.CurrentPlayer.Job.ToString()})" :
                 InactiveStatus;
 
             var prof = this.Config.ActiveProfile;

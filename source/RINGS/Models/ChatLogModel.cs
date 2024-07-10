@@ -21,6 +21,8 @@ using Prism.Mvvm;
 using RINGS.Common;
 using RINGS.Overlays;
 using Sharlayan.Core;
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.FileIO;
 
 namespace RINGS.Models
 {
@@ -658,14 +660,75 @@ namespace RINGS.Models
 
             var currentProfName = Config.Instance.ActiveProfile?.CharacterName;
 
+            var search_step = 0;
+            byte temp_code = 0;
+            List<byte> codes = new List<byte>();
+            foreach (var b in xivLog.Bytes)
+            {
+                switch (search_step)
+                {
+                    case 0:
+                        if (b == 2)
+                        {
+                            search_step++;
+                        }
+                        break;
+                    case 1:
+                        if (b == 240)
+                        {
+                            search_step++;
+                        }
+                        break;
+                    case 2:
+                        temp_code = b;
+                        search_step++;
+                        break;
+                    case 3:
+                        if (b == 3)
+                        {
+                            codes.Add(temp_code);
+                        }
+                        search_step = 0;
+                        break;
+                }
+            }
+
             var chatLogLine = RemoveSpecialChar(xivLog.Line);
             var chatLogLineRaw = RemoveSpecialChar(xivLog.Raw);
 
             var delimiterIndex = chatLogLineRaw.LastIndexOf("\u001f");
             if (delimiterIndex > -1)
             {
+                // 定型文を強引に生成する
                 var message = chatLogLineRaw.Substring(delimiterIndex + 1);
-                chatLogLine = chatLogLine.Replace(message, $":{message}");
+                var pre_replace_mes = "";
+                var loop = 0;
+                char before_c = (char)0;
+                bool hit = false;
+                foreach (var c in message)
+                {
+                    if (c == 65533)
+                    {
+                        if (before_c != 65533)
+                        {
+                            var find = RINGS.Common.Completion.Instance.completion_List.Find(x => x.code == codes[loop]);
+                            pre_replace_mes = pre_replace_mes.Remove(pre_replace_mes.Length - 1);
+                            pre_replace_mes += find.text;
+                            loop++;
+                            hit = true;
+                        }
+                    }
+                    else
+                    {
+                        pre_replace_mes += c;
+                    }
+                    before_c = c;
+                }
+                if (hit)
+                {
+                    chatLogLine = chatLogLine.Substring(0, chatLogLine.IndexOf(":"));
+                    chatLogLine += ":" + pre_replace_mes;
+                }
             }
 
             // メッセージを置換できていなければ話者辞書による置換を試みる
