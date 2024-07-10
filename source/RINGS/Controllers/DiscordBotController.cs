@@ -97,7 +97,7 @@ namespace RINGS.Controllers
                         {
                             var discordconfig = new DiscordSocketConfig
                             {
-                                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildVoiceStates
+                                GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildVoiceStates | GatewayIntents.MessageContent
                             };
                             var bot = new DiscordSocketClient(discordconfig);
                             this.Bots.AddOrUpdate(
