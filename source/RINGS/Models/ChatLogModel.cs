@@ -23,6 +23,7 @@ using RINGS.Overlays;
 using Sharlayan.Core;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
+using Discord.Rest;
 
 namespace RINGS.Models
 {
@@ -662,11 +663,75 @@ namespace RINGS.Models
 
             var search_step = 0;
             byte temp_code = 0;
+            var bSign = false;
             List<byte> codes = new List<byte>();
             foreach (var b in xivLog.Bytes)
             {
                 switch (search_step)
                 {
+#if true
+                    //detect 46
+                    case 0:
+                        if (b == 2)
+                        {
+                            search_step++;
+                        }
+                        break;
+                    case 1:
+                        if (b == 46)
+                        {
+                            search_step++;
+                        }
+                        break;
+                    case 2:
+                        if (b == 4) // 次のコードに240がある場合は4
+                        {
+                            search_step++;
+                        } else if (b == 3) // 次のコードに240が無い場合は3
+                        {
+                            search_step++;
+                        } else
+                        {
+                            search_step = 0;
+                        }
+                        break;
+                    //detect code
+                    case 3:
+                        if (b == 2)
+                        {
+                            search_step++;
+                        }
+                        break;
+                    case 4:
+                        if (b == 240)
+                        {
+                            bSign = true;
+                            search_step++;
+                        } else
+                        {
+                            // 240ではない場合はコード+1の値が入っている
+                            bSign = false;
+                            temp_code = b;
+                            temp_code--;
+                            search_step+=2;
+                        }
+                        break;
+                    case 5:
+                        if (bSign)
+                        {
+                            temp_code = b;
+                        }
+                        search_step++;
+                        break;
+                    case 6:
+                        if (b == 3)
+                        {
+                            codes.Add(temp_code);
+                        }
+                        search_step = 0;
+                        break;
+
+#else
                     case 0:
                         if (b == 2)
                         {
@@ -690,6 +755,7 @@ namespace RINGS.Models
                         }
                         search_step = 0;
                         break;
+#endif
                 }
             }
 
